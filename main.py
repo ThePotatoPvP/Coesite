@@ -6,6 +6,7 @@ from PyQt6.QtCore import QRunnable, QThreadPool, QObject, pyqtSignal
 from youtube import search_youtube
 from soundcloud import search_soundcloud
 from audio import order
+from download import download_audio
 
 class MainWindow(QMainWindow):
 
@@ -21,6 +22,7 @@ class MainWindow(QMainWindow):
 
         # Create a vertical layout for the widget list
         self.list_layout = QVBoxLayout()
+        self.list_layout.setContentsMargins(0, 0, 0, 0)
 
         # Create a widget to hold the text input and the button
         self.search_bar = SearchBar(self.update_list)
@@ -34,6 +36,7 @@ class MainWindow(QMainWindow):
 
         # Create a vertical layout for the main window
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.folder_select)
         main_layout.addWidget(self.search_bar)
         main_layout.addWidget(self.list_widget)
@@ -63,7 +66,7 @@ class MainWindow(QMainWindow):
     def update_list_widget(self, results):
         self.purge_list()
         for r in results:
-            self.list_layout.addWidget(ListItem(r))
+            self.list_layout.addWidget(ListItem(r, self))
 
 class SearchSignals(QObject):
     finished = pyqtSignal(list)
@@ -82,20 +85,27 @@ class SearchWorker(QRunnable):
 
 class ListItem(QWidget):
 
-    def __init__(self, songObject: dict):
+    def __init__(self, songObject: dict, _parent):
         super(ListItem, self).__init__()
         self.setAutoFillBackground(True)
+        self._parent = _parent
 
         layout = QHBoxLayout()
+        layout.setContentsMargins(20, 0, 20, 0)
         self._label = QLabel(f"{songObject['video_name']} - {songObject['channel_name']} ({songObject['audio_quality']})")
         self._url = songObject['url']
         self.button = QPushButton("Download")
+        self.button.setGeometry(10, 50, 150, 30)
+        self.button.clicked.connect(self.download)
 
         layout.addWidget(self._label)
         layout.addStretch(1)
         layout.addWidget(self.button)
 
         self.setLayout(layout)
+
+    def download(self):
+        download_audio(self._url, self._parent.folder_select.cur_folder)
 
 class SearchBar(QWidget):
     def __init__(self, func):
