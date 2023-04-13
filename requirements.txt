@@ -1,2 +1,4 @@
-PyQT5
+PyQt6
 cx-Freeze
+yt-dlp
+youtubesearchpython
