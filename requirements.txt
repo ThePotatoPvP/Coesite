@@ -1,4 +1,4 @@
 PyQt6
 cx-Freeze
 yt-dlp
-youtubesearchpython
+youtube_search_python
